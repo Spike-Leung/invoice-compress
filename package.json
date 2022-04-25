@@ -1,0 +1,10 @@
+{
+  "name": "invoice-compress",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Spike <l-yanlei@hotmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "extract-pdf": "sh ./scripts/extract-pdf.sh"
+  }
+}

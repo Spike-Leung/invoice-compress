@@ -1,0 +1,13 @@
+* Get started
+** install mu & isync
+** config mu & isync
+** download all your email
+** filter email with invoice
+*** handle email with pdf
+*** handle email with download links
+** put other invoice link in a file
+*** handle links and download
+** copy all invoice into a folder
+** put other invoice into the folder
+** compress all invoice and rename it
+** TODO calculate invoice sum
