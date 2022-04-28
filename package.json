@@ -5,6 +5,11 @@
   "author": "Spike <l-yanlei@hotmail.com>",
   "license": "MIT",
   "scripts": {
-    "extract-pdf": "sh ./scripts/extract-pdf.sh"
+    "extract-pdf": "sh ./scripts/extract-pdf.sh",
+    "extract-link": "sh ./scripts/extract-link.sh"
+  },
+  "dependencies": {
+    "jsdom": "^19.0.0",
+    "mailparser": "^3.4.0"
   }
 }
