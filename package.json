@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "jsdom": "^19.0.0",
-    "mailparser": "^3.4.0"
+    "mailparser": "^3.4.0",
+    "puppeteer": "^13.7.0"
   }
 }

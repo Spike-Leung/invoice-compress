@@ -1,11 +1,12 @@
 const { readFile } = require("fs/promises");
+const fs = require("fs");
 const jsdom = require("jsdom");
 const smp = require("mailParser").simpleParser;
 const URL = require("url").URL;
-const fs = require("fs");
 const http = require("http");
 const https = require("https");
 const { JSDOM } = jsdom;
+const handleBaiwangUrl = require("./adapter/baiwang");
 
 readFile("./temp/mail.xml", "utf8").then((data) => {
   const mailPaths = [...data.matchAll(/<path>(.*)<\/path>/g)].map(
@@ -19,8 +20,10 @@ readFile("./temp/mail.xml", "utf8").then((data) => {
     promises.push(
       readFile(mailPath, "utf8").then(async (mail) => {
         let { html } = await smp(mail);
+
         const dom = new JSDOM(html);
         const anchors = dom.window.document.querySelectorAll("a");
+
         anchors.forEach((a) => {
           if (a.href.trim() !== "") {
             const url = new URL(a.href);
@@ -46,6 +49,7 @@ readFile("./temp/mail.xml", "utf8").then((data) => {
 
   Promise.all(promises).then(() => {
     const links = [...linkSet];
+
     links.forEach((l, index) => {
       const isHttp = l.indexOf("https") === -1;
       download(l, "./pdf/" + index + ".pdf", isHttp);
@@ -72,8 +76,43 @@ var download = function (url, dest, isHttp) {
       .get(
         url,
         { headers: { "Content-Type": "application/pdf" } },
-        function (response) {
-          response.pipe(file);
+        async function (response) {
+          const { statusCode } = response;
+
+          if (url.indexOf("baiwang.com") !== -1) {
+            const pdfUrl = await handleBaiwangUrl(url);
+
+            https
+              .get(
+                pdfUrl,
+                { headers: { "Content-Type": "application/pdf" } },
+                function (response) {
+                  file = fs.createWriteStream(dest);
+                  response.pipe(file);
+                }
+              )
+              .on("error", (error) => {
+                console.log(error);
+              });
+          }
+
+          if (statusCode === 302) {
+            const { location } = response.headers;
+
+            https
+              .get(
+                location,
+                { headers: { "Content-Type": "application/pdf" } },
+                function (response) {
+                  response.pipe(file);
+                }
+              )
+              .on("error", (error) => {
+                console.log(error);
+              });
+          } else {
+            response.pipe(file);
+          }
         }
       )
       .on("error", function (err) {
