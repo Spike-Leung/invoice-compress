@@ -1,13 +1,83 @@
+Only test under MacOs now.
+
+* prepare
+** install isync
+   You should have ~brew~ installed. If not, you can download from [[https://brew.sh/][here]]
+   ~brew install isync~
+
+** install mu
+   ~brew install mu~
+
+** install gpg
+   To encrypt email password.
+   ~brew install gnupg gnupg2~
+
+** create gpg password
+   - create an file and write your email password in it. For example:  ~echo my-password ./pass~
+   - use gpg encrypt: ~gpg -c -o ~./pass.gpg ./pass~
+   - config ~./pass.gpg~ to ~.mbsyncrc~ 's ~Passcmd~, see below
+
+** config isync
+   - create a folder, ~mkdir ~/Maildir~
+   - create a file, ~~/.mbsyncrc~
+
+   fullill ~.mbsyncrc~ with your email config, for example:
+
+   #+begin_src bash
+     # Remote IMAP account
+     # your email IMAP config
+     IMAPAccount spike
+     Host outlook.office365.com
+     Port 993
+     User <your-email-address>
+     # your need to use gpg to decript your pass if you encrypt
+     PassCmd "gpg -q --for-your-eyes-only --no-tty -d ~/pass.gpg"
+     # if you do not encrypt your pass, you can use this:
+     # Pass <your email password>
+     SSLType IMAPS
+     SSLVersions TLSv1.2
+
+     # Remote Store
+     # outlook-remote-spike is `Far`
+     IMAPStore outlook-remote-spike
+     Account l-yanlei
+
+     # outlook-local-spike is `Near`
+     MaildirStore outlook-local-spike
+     # where to save your email
+     Path ~/Maildir/spike
+     # where to save your inbox
+     Inbox ~/Maildir/spike/INBOX
+     SubFolders Verbatim
+
+     # Channels
+     Channel outlook-spike
+     Far :outlook-remote-spike:
+     Near :outlook-local-spike:
+     Patterns *
+     Expunge None
+     CopyArrivalDate yes
+     Sync All
+     Create Near
+     SyncState *
+
+     # Group
+   #+end_src
+
+   For more info, you can find from [[https://wiki.archlinux.org/title/isync][here]].
+** download your email
+   ~mbsync -a~
+** use mu to index your email
+   ~mu init~
+
+   By default, mu will try to index your email under ~~/.Maildir~
+
 * Get started
-** install mu & isync
-** config mu & isync
-** download all your email
-** filter email with invoice
-*** handle email with pdf
-*** handle email with download links
-** put other invoice link in a file
-*** handle links and download
-** copy all invoice into a folder
-** put other invoice into the folder
-** compress all invoice and rename it
-** TODO calculate invoice sum
+  #+begin_src bash
+    git clone https://github.com/Spike-Leung/invoice-compress.git
+    cd invoice-compress
+    yarn
+    yarn extract
+  #+end_src
+* todos
+  - [ ] calculate invoice sum
