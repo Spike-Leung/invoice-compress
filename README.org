@@ -79,7 +79,7 @@ You Should Have ~Brew~ Installed. If Not, You Can Download From [[Https://Brew.S
   #+begin_src bash
     git clone https://github.com/Spike-Leung/invoice-compress.git
     cd invoice-compress
-    yarn
+    PUPPETEER_PRODUCT=firefox yarn
     yarn extract
   #+end_src
 
