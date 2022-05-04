@@ -1,9 +1,8 @@
 Only test under MacOs now.
 
 * prepare
+You should have ~brew~ installed. If not, you can download from [[https://brew.sh/][here]]
 ** install isync
-   You should have ~brew~ installed. If not, you can download from [[https://brew.sh/][here]]
-
    ~brew install isync~
 
 ** install mu
@@ -86,7 +85,7 @@ Only test under MacOs now.
 
 
 ** Specify date range
-   By default, this script will extract all invoice in this month.
+   By default, this script will extract all invoice in current month.
 
    But you can also specify a time range to extract. For example:
 
@@ -96,6 +95,7 @@ Only test under MacOs now.
 * How it works
   - use ~isync~ to download all emails
   - use ~mu~ to index, find, and extract pdf in emails
+    (in the script, mu find the email subject with "发票", you can fork this repo to custom yours)
   - use ~mu~ to find invoice email without pdf, but have a download links
   - use ~mailParser~ parse the email, and use ~jsdom~ query the download links
   - then use ~http~ and ~https~ node module to download pdf from links
