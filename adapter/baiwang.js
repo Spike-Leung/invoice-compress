@@ -21,4 +21,7 @@ async function getBaiwangUrl(url) {
   return downloadUrl;
 }
 
-module.exports = getBaiwangUrl;
+module.exports = {
+  path: "baiwang.com",
+  resolver: getBaiwangUrl,
+};

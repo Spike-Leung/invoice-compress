@@ -6,7 +6,7 @@ const URL = require("url").URL;
 const http = require("http");
 const https = require("https");
 const { JSDOM } = jsdom;
-const handleBaiwangUrl = require("./adapter/baiwang");
+const adapters = require("./adapter");
 const COMMON_REQUSET_OPTIONS = {
   headers: { "Content-Type": "application/pdf" },
 };
@@ -87,14 +87,17 @@ function downloadByHttps(url, dest) {
     .get(url, COMMON_REQUSET_OPTIONS, async function (response) {
       const { statusCode } = response;
 
-      if (url.indexOf("baiwang.com") !== -1) {
-        handleHttpsBaiWang(url, dest);
-        return;
+      for (const { path, resolver } of Object.values(adapters)) {
+        if (url.indexOf(path) !== -1) {
+          const newUrl = await resolver(url);
+          downloadWithNewUrl(newUrl, dest);
+          return;
+        }
       }
 
       if (statusCode === 302) {
         const { location } = response.headers;
-        handleHttpsRedirectUrl(location, dest);
+        downloadWithNewUrl(location, dest);
         return;
       }
 
@@ -105,24 +108,10 @@ function downloadByHttps(url, dest) {
     });
 }
 
-async function handleHttpsBaiWang(url, dest) {
-  const pdfUrl = await handleBaiwangUrl(url);
-
-  https
-    .get(pdfUrl, COMMON_REQUSET_OPTIONS, function (response) {
-      const file = fs.createWriteStream(dest);
-      response.pipe(file);
-    })
-    .on("error", (error) => {
-      console.log(error);
-    });
-}
-
-function handleHttpsRedirectUrl(url, dest) {
-  const file = fs.createWriteStream(dest);
-
+function downloadWithNewUrl(url, dest) {
   https
     .get(url, COMMON_REQUSET_OPTIONS, function (response) {
+      const file = fs.createWriteStream(dest);
       response.pipe(file);
     })
     .on("error", (error) => {
