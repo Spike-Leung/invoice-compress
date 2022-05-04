@@ -16,12 +16,12 @@ Only test under MacOs now.
 
 ** create gpg password
    - create a file and write your email password in it. For example: ~echo my-password > ​~/pass~
-   - use gpg encrypt the file with password: ~gpg -c -o ​~​~/pass.gpg ​~/pass~
-   - then config ​~​~/pass.gpg~ to ~.mbsyncrc~ 's ~PassCmd~, see below
+   - use gpg encrypt the file with password: ~gpg -c -o ​​~/pass.gpg ​~/pass~
+   - then config ~​~/pass.gpg~ to ~.mbsyncrc~ 's ~PassCmd~, see below
 
 ** config isync
    - create a folder, ~mkdir ~/Maildir~
-   - create a file, ​~​~/.mbsyncrc~
+   - create a file, ~​~/.mbsyncrc~
 
    fullill ~.mbsyncrc~ with your email config, for example:
 
