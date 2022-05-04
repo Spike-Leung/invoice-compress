@@ -1,24 +1,24 @@
-Only test under MacOs now.
+Only Test Under Macos Now.
 
-* prepare
-You should have ~brew~ installed. If not, you can download from [[https://brew.sh/][here]]
-** install isync
-   ~brew install isync~
+* Prepare
+You Should Have ~Brew~ Installed. If Not, You Can Download From [[Https://Brew.Sh/][Here]]
+** Install Isync
+   ~Brew Install Isync~
 
-** install mu
+** Install mu
    ~brew install mu~
 
-** install gpg
+** Install gpg
    Use ~gpg~ to encrypt email password.
 
    ~brew install gnupg gnupg2~
 
-** create gpg password
+** Create gpg password
    - create a file and write your email password in it. For example: ~echo my-password > ​~/pass~
    - use gpg encrypt the file with password: ~gpg -c -o ​​~/pass.gpg ​~/pass~
    - then config ~​~/pass.gpg~ to ~.mbsyncrc~ 's ~PassCmd~, see below
 
-** config isync
+** Config isync
    - create a folder, ~mkdir ~/Maildir~
    - create a file, ~​~/.mbsyncrc~
 
@@ -66,11 +66,11 @@ You should have ~brew~ installed. If not, you can download from [[https://brew.s
    #+end_src
 
    For more info, you can find [[https://wiki.archlinux.org/title/isync][here]].
-** download your email
+** Download your email
    ~mbsync -a~
 
    This may take a long time if you have lots of emails.
-** use mu to index your email
+** Use mu to index your email
    ~mu init~
 
    By default, mu will try to index your email under ~~/.Maildir~
@@ -100,5 +100,6 @@ You should have ~brew~ installed. If not, you can download from [[https://brew.s
   - use ~mailParser~ parse the email, and use ~jsdom~ query the download links
   - then use ~http~ and ~https~ node module to download pdf from links
   - if there are links can not download directly, write a adapter which use ~puppeteer~ or something else to find the download links
-* todos
+
+* Todo
   - [ ] calculate invoice sum
