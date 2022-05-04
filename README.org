@@ -15,13 +15,13 @@ Only test under MacOs now.
    ~brew install gnupg gnupg2~
 
 ** create gpg password
-   - create a file and write your email password in it. For example: ~echo my-password > ​~~/pass~
-   - use gpg encrypt the file with password: ~gpg -c -o ​~~/pass.gpg ​~~/pass~
-   - then config ​~~/pass.gpg~ to ~.mbsyncrc~ 's ~PassCmd~, see below
+   - create a file and write your email password in it. For example: ~echo my-password > ​~/pass~
+   - use gpg encrypt the file with password: ~gpg -c -o ​~​~/pass.gpg ​~/pass~
+   - then config ​~​~/pass.gpg~ to ~.mbsyncrc~ 's ~PassCmd~, see below
 
 ** config isync
    - create a folder, ~mkdir ~/Maildir~
-   - create a file, ​~~/.mbsyncrc~
+   - create a file, ​~​~/.mbsyncrc~
 
    fullill ~.mbsyncrc~ with your email config, for example:
 
@@ -97,7 +97,7 @@ Only test under MacOs now.
   - use ~isync~ to download all emails
   - use ~mu~ to index, find, and extract pdf in emails
   - use ~mu~ to find invoice email without pdf, but have a download links
-  - use ~mailParser~ parse the email, and use ~jsDom~ query the download links
+  - use ~mailParser~ parse the email, and use ~jsdom~ query the download links
   - then use ~http~ and ~https~ node module to download pdf from links
   - if there are links can not download directly, write a adapter which use ~puppeteer~ or something else to find the download links
 * todos
