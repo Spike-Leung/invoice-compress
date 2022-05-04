@@ -3,23 +3,25 @@ Only test under MacOs now.
 * prepare
 ** install isync
    You should have ~brew~ installed. If not, you can download from [[https://brew.sh/][here]]
+
    ~brew install isync~
 
 ** install mu
    ~brew install mu~
 
 ** install gpg
-   To encrypt email password.
+   Use ~gpg~ to encrypt email password.
+
    ~brew install gnupg gnupg2~
 
 ** create gpg password
-   - create an file and write your email password in it. For example:  ~echo my-password ./pass~
-   - use gpg encrypt: ~gpg -c -o ~./pass.gpg ./pass~
-   - config ~./pass.gpg~ to ~.mbsyncrc~ 's ~Passcmd~, see below
+   - create a file and write your email password in it. For example: ~echo my-password > ​~~/pass~
+   - use gpg encrypt the file with password: ~gpg -c -o ​~~/pass.gpg ​~~/pass~
+   - then config ​~~/pass.gpg~ to ~.mbsyncrc~ 's ~PassCmd~, see below
 
 ** config isync
    - create a folder, ~mkdir ~/Maildir~
-   - create a file, ~~/.mbsyncrc~
+   - create a file, ​~~/.mbsyncrc~
 
    fullill ~.mbsyncrc~ with your email config, for example:
 
@@ -30,7 +32,7 @@ Only test under MacOs now.
      Host outlook.office365.com
      Port 993
      User <your-email-address>
-     # your need to use gpg to decript your pass if you encrypt
+     # your need to use gpg to decript your pass if you have encrypted
      PassCmd "gpg -q --for-your-eyes-only --no-tty -d ~/pass.gpg"
      # if you do not encrypt your pass, you can use this:
      # Pass <your email password>
@@ -64,9 +66,11 @@ Only test under MacOs now.
      # Group
    #+end_src
 
-   For more info, you can find from [[https://wiki.archlinux.org/title/isync][here]].
+   For more info, you can find [[https://wiki.archlinux.org/title/isync][here]].
 ** download your email
    ~mbsync -a~
+
+   This may take a long time if you have lots of emails.
 ** use mu to index your email
    ~mu init~
 
@@ -79,5 +83,22 @@ Only test under MacOs now.
     yarn
     yarn extract
   #+end_src
+
+
+** Specify date range
+   By default, this script will extract all invoice in this month.
+
+   But you can also specify a time range to extract. For example:
+
+   ~yarn extract 20220401...20220502~
+
+
+* How it works
+  - use ~isync~ to download all emails
+  - use ~mu~ to index, find, and extract pdf in emails
+  - use ~mu~ to find invoice email without pdf, but have a download links
+  - use ~mailParser~ parse the email, and use ~jsDom~ query the download links
+  - then use ~http~ and ~https~ node module to download pdf from links
+  - if there are links can not download directly, write a adapter which use ~puppeteer~ or something else to find the download links
 * todos
   - [ ] calculate invoice sum
