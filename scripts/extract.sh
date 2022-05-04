@@ -3,7 +3,7 @@
 BYellow='\033[1;33m'
 BGreen='\033[1;32m'
 echo "${BYellow}Empty pdf folder..."
-rm -rfI ./pdf
+rm -rfI ./pdf/*
 
 echo "\n\n${BYellow}Extract mail with pdf..."
 ./scripts/extract-pdf.sh $1

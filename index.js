@@ -72,7 +72,14 @@ function downloadByHttp(url, dest) {
   const file = fs.createWriteStream(dest);
 
   http
-    .get(url, COMMON_REQUSET_OPTIONS, function (response) {
+    .get(url, COMMON_REQUSET_OPTIONS, async function (response) {
+      const newUrl = await resolveDirectlyDownloadUrl(url, response);
+
+      if (newUrl) {
+        downloadWithNewUrlHttp(newUrl, dest);
+        return;
+      }
+
       response.pipe(file);
     })
     .on("error", function (err) {
@@ -85,19 +92,10 @@ function downloadByHttps(url, dest) {
 
   https
     .get(url, COMMON_REQUSET_OPTIONS, async function (response) {
-      const { statusCode } = response;
+      const newUrl = await resolveDirectlyDownloadUrl(url, response);
 
-      for (const { path, resolver } of Object.values(adapters)) {
-        if (url.indexOf(path) !== -1) {
-          const newUrl = await resolver(url);
-          downloadWithNewUrl(newUrl, dest);
-          return;
-        }
-      }
-
-      if (statusCode === 302) {
-        const { location } = response.headers;
-        downloadWithNewUrl(location, dest);
+      if (newUrl) {
+        downloadWithNewUrlHttps(newUrl, dest);
         return;
       }
 
@@ -108,7 +106,39 @@ function downloadByHttps(url, dest) {
     });
 }
 
-function downloadWithNewUrl(url, dest) {
+/**
+ * @return {string} directly download url
+ */
+async function resolveDirectlyDownloadUrl(url, response) {
+  const { statusCode, headers } = response;
+
+  for (const { path, resolver } of Object.values(adapters)) {
+    if (url.indexOf(path) !== -1) {
+      const newUrl = await resolver(url);
+      return newUrl;
+    }
+  }
+
+  if (statusCode === 302) {
+    const { location } = headers;
+    return location;
+  }
+
+  return "";
+}
+
+function downloadWithNewUrlHttp(url, dest) {
+  http
+    .get(url, COMMON_REQUSET_OPTIONS, function (response) {
+      const file = fs.createWriteStream(dest);
+      response.pipe(file);
+    })
+    .on("error", (error) => {
+      console.log(error);
+    });
+}
+
+function downloadWithNewUrlHttps(url, dest) {
   https
     .get(url, COMMON_REQUSET_OPTIONS, function (response) {
       const file = fs.createWriteStream(dest);
