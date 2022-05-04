@@ -5,6 +5,7 @@
   "author": "Spike <l-yanlei@hotmail.com>",
   "license": "MIT",
   "scripts": {
+    "extract": "sh ./scripts/extract.sh",
     "extract-pdf": "sh ./scripts/extract-pdf.sh",
     "extract-link": "sh ./scripts/extract-link.sh"
   },
