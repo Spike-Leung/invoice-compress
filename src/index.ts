@@ -3,38 +3,73 @@ import fs from "fs";
 import jsdom from "jsdom";
 import { simpleParser as smp } from "mailparser";
 import { URL } from "url";
+import { Parser } from "xml2js";
 import http from "http";
 import https from "https";
 import adapters from "./adapter";
 
+const xmlParser = new Parser();
 const { JSDOM } = jsdom;
 const COMMON_REQUSET_OPTIONS = {
   headers: { "Content-Type": "application/pdf" },
 };
 
-readFile("./temp/mail.xml", "utf8").then((data) => {
-  const mailPaths = [...data.matchAll(/<path>(.*)<\/path>/g)].map(
-    ([_, path]) => path
-  );
+interface MailConfig {
+  path: string;
+  date: string;
+  subject: string;
+}
 
-  const promises: Promise<string[]>[] = [];
+interface MailConfigWithDownloadLink {
+  path: string;
+  date: string;
+  subject: string;
+  links: string[];
+}
 
-  mailPaths.forEach(async (mailPath) =>
-    promises.push(resolveMailPdfLink(mailPath))
-  );
+readFile("./temp/mail.xml", "utf8").then((xml) => {
+  xmlParser.parseStringPromise(xml).then((result) => {
+    let data = [];
 
-  Promise.all(promises).then((rawLinks) => {
-    const links = [...new Set(rawLinks.flat())];
+    data = result?.messages?.message?.map(
+      ({ subject, date, path }: MailConfig) => {
+        return {
+          subject: subject[0],
+          path: path[0],
+          date: new Intl.DateTimeFormat("zh")
+            .format(+date[0].padEnd(13, "0"))
+            .split("/")
+            .join("-"),
+        };
+      }
+    );
 
-    links.forEach((l, index) => {
-      const isHttp = l.indexOf("https") === -1;
-      download(l, "./pdf/" + index + ".pdf", isHttp);
+    const promises: Promise<MailConfigWithDownloadLink>[] = [];
+
+    data.forEach(async (mailConfig: MailConfig) =>
+      promises.push(resolveMailPdfLink(mailConfig))
+    );
+
+    Promise.all(promises).then((results) => {
+      results.forEach((r) => {
+        const { links, subject, date } = r;
+        const dest = `pdf/${date}_${subject}.pdf`;
+
+        links.forEach((l) => {
+          const isHttp = l.indexOf("https") === -1;
+          download(l, dest, isHttp);
+        });
+      });
     });
   });
 });
 
-async function resolveMailPdfLink(mailPath: string) {
-  return readFile(mailPath, "utf8").then(async (mail) => {
+async function resolveMailPdfLink(
+  mailConfig: MailConfig
+): Promise<MailConfigWithDownloadLink> {
+  const { path } = mailConfig;
+
+  return readFile(path, "utf8").then(async (mail) => {
     let { html = "" } = await smp(mail);
     let links: string[] = [];
     const dom = new JSDOM(html as string);
@@ -52,7 +87,10 @@ async function resolveMailPdfLink(mailPath: string) {
       }
     });
 
-    return links;
+    return {
+      ...mailConfig,
+      links: [...new Set(links)],
+    };
   });
 }
 
