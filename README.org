@@ -25,8 +25,7 @@ You Should Have ~Brew~ Installed. If Not, You Can Download From [[Https://Brew.S
    fullill ~.mbsyncrc~ with your email config, for example:
 
    #+begin_src bash
-     # Remote IMAP account
-     # your email IMAP config
+     # your email IMAP config, setup your account
      IMAPAccount spike
      Host outlook.office365.com
      Port 993
@@ -39,22 +38,25 @@ You Should Have ~Brew~ Installed. If Not, You Can Download From [[Https://Brew.S
      SSLVersions TLSv1.2
 
      # Remote Store
-     # outlook-remote-spike is `Far`
-     IMAPStore outlook-remote-spike
-     Account l-yanlei
+     # set `Far`(remote) store
+     IMAPStore remote
+     Account spike
 
-     # outlook-local-spike is `Near`
-     MaildirStore outlook-local-spike
+     # set `Near` (local) store
+     MaildirStore local
      # where to save your email
+     # if folder not exist, you need to create it
      Path ~/Maildir/spike
      # where to save your inbox
      Inbox ~/Maildir/spike/INBOX
      SubFolders Verbatim
 
      # Channels
-     Channel outlook-spike
-     Far :outlook-remote-spike:
-     Near :outlook-local-spike:
+     Channel spike
+     # refer to IMAPStore name
+     Far :remote:
+     # refer to MaildirStore name
+     Near :local:
      Patterns *
      Expunge None
      CopyArrivalDate yes
@@ -62,7 +64,6 @@ You Should Have ~Brew~ Installed. If Not, You Can Download From [[Https://Brew.S
      Create Near
      SyncState *
 
-     # Group
    #+end_src
 
    For more info, you can find [[https://wiki.archlinux.org/title/isync][here]].
@@ -71,7 +72,14 @@ You Should Have ~Brew~ Installed. If Not, You Can Download From [[Https://Brew.S
 
    This may take a long time if you have lots of emails.
 ** Use mu to index your email
-   ~mu init~
+   if your emails has CJK characters，maybe you should set this before:
+
+   ~export XAPIAN_CJK_NGRAM=1~
+
+   then,
+
+   - ~mu init~
+   - ~mu index~
 
    By default, mu will try to index your email under ~~/.Maildir~
 
