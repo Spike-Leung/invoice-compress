@@ -1,9 +1,10 @@
-Only Test Under Macos Now.
+Only test under MacOS now.
 
 * Prepare
-You Should Have ~Brew~ Installed. If Not, You Can Download From [[Https://Brew.Sh/][Here]]
-** Install Isync
-   ~Brew Install Isync~
+You should have ~brew~ installed. If not, you can download from [[https://Brew.Sh/][here]]
+
+** Install isync
+   ~brew install isync~
 
 ** Install mu
    ~brew install mu~
@@ -76,7 +77,7 @@ You Should Have ~Brew~ Installed. If Not, You Can Download From [[Https://Brew.S
 
    ~export XAPIAN_CJK_NGRAM=1~
 
-   then,
+   then
 
    - ~mu init~
    - ~mu index~
