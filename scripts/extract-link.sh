@@ -6,4 +6,4 @@ then date=$1
 fi
 
 mu find 发票 and date:$date and not flag:attach --format='xml' > temp/mail.xml
-node index.js
+ts-node src/index

@@ -1,6 +1,6 @@
-const puppeteer = require("puppeteer");
+import puppeteer from "puppeteer";
 
-async function getBaiwangUrl(url) {
+async function getBaiwangUrl(url: string) {
   let downloadUrl;
 
   const browser = await puppeteer.launch({
@@ -15,13 +15,13 @@ async function getBaiwangUrl(url) {
   await page2.waitForTimeout(4000);
 
   const [_1, _2, page3] = await browser.pages();
-  downloadUrl = await page3.url();
+  downloadUrl = page3.url();
 
   await browser.close();
   return downloadUrl;
 }
 
-module.exports = {
+export default {
   path: "baiwang.com",
   resolver: getBaiwangUrl,
 };

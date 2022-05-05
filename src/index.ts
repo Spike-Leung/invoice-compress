@@ -1,12 +1,13 @@
-const { readFile } = require("fs/promises");
-const fs = require("fs");
-const jsdom = require("jsdom");
-const smp = require("mailParser").simpleParser;
-const URL = require("url").URL;
-const http = require("http");
-const https = require("https");
+import { readFile } from "fs/promises";
+import fs from "fs";
+import jsdom from "jsdom";
+import { simpleParser as smp } from "mailparser";
+import { URL } from "url";
+import http from "http";
+import https from "https";
+import adapters from "./adapter";
+
 const { JSDOM } = jsdom;
-const adapters = require("./adapter");
 const COMMON_REQUSET_OPTIONS = {
   headers: { "Content-Type": "application/pdf" },
 };
@@ -16,7 +17,7 @@ readFile("./temp/mail.xml", "utf8").then((data) => {
     ([_, path]) => path
   );
 
-  const promises = [];
+  const promises: Promise<string[]>[] = [];
 
   mailPaths.forEach(async (mailPath) =>
     promises.push(resolveMailPdfLink(mailPath))
@@ -32,11 +33,11 @@ readFile("./temp/mail.xml", "utf8").then((data) => {
   });
 });
 
-async function resolveMailPdfLink(mailPath) {
+async function resolveMailPdfLink(mailPath: string) {
   return readFile(mailPath, "utf8").then(async (mail) => {
-    let { html } = await smp(mail);
-    let links = [];
-    const dom = new JSDOM(html);
+    let { html = "" } = await smp(mail);
+    let links: string[] = [];
+    const dom = new JSDOM(html as string);
     const anchors = dom.window.document.querySelectorAll("a");
 
     anchors.forEach((a) => {
@@ -50,29 +51,29 @@ async function resolveMailPdfLink(mailPath) {
         }
       }
     });
+
     return links;
   });
 }
 
 /**
- * @param {string} url
- * @return {boolean} if url match exclude keyword, return false; Else return true
+ * If url match exclude keyword, return false; Else return true
  */
-function filterExcludeLinks(url) {
+function filterExcludeLinks(url: string): boolean {
   return ["ad.", "adv.", "pdf/view", "apissp.fapiao.com/pz"].every(
     (w) => url.indexOf(w) === -1
   );
 }
 
-function download(url, dest, isHttp) {
+function download(url: string, dest: string, isHttp: boolean) {
   isHttp ? downloadByHttp(url, dest) : downloadByHttps(url, dest);
 }
 
-function downloadByHttp(url, dest) {
+function downloadByHttp(url: string, dest: string) {
   const file = fs.createWriteStream(dest);
 
   http
-    .get(url, COMMON_REQUSET_OPTIONS, async function (response) {
+    .get(url, COMMON_REQUSET_OPTIONS, async function(response) {
       const newUrl = await resolveDirectlyDownloadUrl(url, response);
 
       if (newUrl) {
@@ -82,16 +83,16 @@ function downloadByHttp(url, dest) {
 
       response.pipe(file);
     })
-    .on("error", function (err) {
+    .on("error", function(err) {
       console.log({ error: err });
     });
 }
 
-function downloadByHttps(url, dest) {
+function downloadByHttps(url: string, dest: string) {
   const file = fs.createWriteStream(dest);
 
   https
-    .get(url, COMMON_REQUSET_OPTIONS, async function (response) {
+    .get(url, COMMON_REQUSET_OPTIONS, async function(response) {
       const newUrl = await resolveDirectlyDownloadUrl(url, response);
 
       if (newUrl) {
@@ -101,7 +102,7 @@ function downloadByHttps(url, dest) {
 
       response.pipe(file);
     })
-    .on("error", function (err) {
+    .on("error", function(err) {
       console.log({ error: err });
     });
 }
@@ -109,7 +110,10 @@ function downloadByHttps(url, dest) {
 /**
  * @return {string} directly download url
  */
-async function resolveDirectlyDownloadUrl(url, response) {
+async function resolveDirectlyDownloadUrl(
+  url: string,
+  response: http.IncomingMessage
+): Promise<string> {
   const { statusCode, headers } = response;
 
   for (const { path, resolver } of Object.values(adapters)) {
@@ -121,15 +125,15 @@ async function resolveDirectlyDownloadUrl(url, response) {
 
   if (statusCode === 302) {
     const { location } = headers;
-    return location;
+    return location as string;
   }
 
   return "";
 }
 
-function downloadWithNewUrlHttp(url, dest) {
+function downloadWithNewUrlHttp(url: string, dest: string): void {
   http
-    .get(url, COMMON_REQUSET_OPTIONS, function (response) {
+    .get(url, COMMON_REQUSET_OPTIONS, function(response) {
       const file = fs.createWriteStream(dest);
       response.pipe(file);
     })
@@ -138,9 +142,9 @@ function downloadWithNewUrlHttp(url, dest) {
     });
 }
 
-function downloadWithNewUrlHttps(url, dest) {
+function downloadWithNewUrlHttps(url: string, dest: string): void {
   https
-    .get(url, COMMON_REQUSET_OPTIONS, function (response) {
+    .get(url, COMMON_REQUSET_OPTIONS, function(response) {
       const file = fs.createWriteStream(dest);
       response.pipe(file);
     })

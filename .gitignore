@@ -1,4 +1,5 @@
 node_modules
 pdf
 temp
+dist
 .DS_Store
