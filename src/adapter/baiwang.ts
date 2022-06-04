@@ -22,6 +22,6 @@ async function getBaiwangUrl(url: string) {
 }
 
 export default {
-  path: "baiwang.com",
+  path: "pis.baiwang.com",
   resolver: getBaiwangUrl,
 };
