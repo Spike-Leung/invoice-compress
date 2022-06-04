@@ -8,11 +8,19 @@ import http from "http";
 import https from "https";
 import adapters from "./adapter";
 
+const URL_EXCLUDE_KEYWORDS = [
+  "ad.",
+  "adv.",
+  "pdf/view",
+  "apissp.fapiao.com/pz",
+  "tr.jd.com",
+];
+
 const xmlParser = new Parser();
 const { JSDOM } = jsdom;
-const COMMON_REQUSET_OPTIONS = {
-  headers: { "Content-Type": "application/pdf" },
-};
+// const COMMON_REQUSET_OPTIONS = {
+//   headers: { "Content-Type": "application/pdf" },
+// };
 
 interface MailConfig {
   path: string;
@@ -56,8 +64,7 @@ readFile("./temp/mail.xml", "utf8").then((xml) => {
         const dest = `pdf/${date}_${subject}.pdf`;
 
         links.forEach((l) => {
-          const isHttp = l.indexOf("https") === -1;
-          download(l, dest, isHttp);
+          download(l, dest);
         });
       });
     });
@@ -98,24 +105,30 @@ async function resolveMailPdfLink(
  * If url match exclude keyword, return false; Else return true
  */
 function filterExcludeLinks(url: string): boolean {
-  return ["ad.", "adv.", "pdf/view", "apissp.fapiao.com/pz"].every(
-    (w) => url.indexOf(w) === -1
-  );
+  return URL_EXCLUDE_KEYWORDS.every((w) => url.indexOf(w) === -1);
 }
 
-function download(url: string, dest: string, isHttp: boolean) {
-  isHttp ? downloadByHttp(url, dest) : downloadByHttps(url, dest);
+function isHttp(url: string): boolean {
+  return url.indexOf("https") === -1;
+}
+
+function download(url: string, dest: string) {
+  const decodedURL = decodeURIComponent(url);
+
+  isHttp(decodedURL)
+    ? downloadByHttp(decodedURL, dest)
+    : downloadByHttps(decodedURL, dest);
 }
 
 function downloadByHttp(url: string, dest: string) {
   const file = fs.createWriteStream(dest);
 
   http
-    .get(url, COMMON_REQUSET_OPTIONS, async function(response) {
+    .get(url, async function(response) {
       const newUrl = await resolveDirectlyDownloadUrl(url, response);
 
       if (newUrl) {
-        downloadWithNewUrlHttp(newUrl, dest);
+        download(newUrl, dest);
         return;
       }
 
@@ -130,11 +143,11 @@ function downloadByHttps(url: string, dest: string) {
   const file = fs.createWriteStream(dest);
 
   https
-    .get(url, COMMON_REQUSET_OPTIONS, async function(response) {
+    .get(url, async function(response) {
       const newUrl = await resolveDirectlyDownloadUrl(url, response);
 
       if (newUrl) {
-        downloadWithNewUrlHttps(newUrl, dest);
+        download(newUrl, dest);
         return;
       }
 
@@ -145,9 +158,6 @@ function downloadByHttps(url: string, dest: string) {
     });
 }
 
-/**
- * @return {string} directly download url
- */
 async function resolveDirectlyDownloadUrl(
   url: string,
   response: http.IncomingMessage
@@ -162,31 +172,10 @@ async function resolveDirectlyDownloadUrl(
   }
 
   if (statusCode === 302) {
-    const { location } = headers;
-    return location as string;
+    const { location, Location } = headers;
+
+    return (location || Location) as string;
   }
 
   return "";
-}
-
-function downloadWithNewUrlHttp(url: string, dest: string): void {
-  http
-    .get(url, COMMON_REQUSET_OPTIONS, function(response) {
-      const file = fs.createWriteStream(dest);
-      response.pipe(file);
-    })
-    .on("error", (error) => {
-      console.log(error);
-    });
-}
-
-function downloadWithNewUrlHttps(url: string, dest: string): void {
-  https
-    .get(url, COMMON_REQUSET_OPTIONS, function(response) {
-      const file = fs.createWriteStream(dest);
-      response.pipe(file);
-    })
-    .on("error", (error) => {
-      console.log(error);
-    });
 }
